@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "astropy==6.1.7",
     "matplotlib==3.10.5",
     "numpy==2.2.6",
     "scipy==1.15.3",
