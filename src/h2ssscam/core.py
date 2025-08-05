@@ -8,8 +8,8 @@ To be incorporated:
 """
 import matplotlib.pyplot as plt
 import astropy.units as u
-from .funcs import *
-from .constants import *
+from funcs import *
+from constants import *
 import numpy as np
 # from funkyfresh import set_style
 # set_style('AAS', silent=True)
@@ -45,8 +45,8 @@ def main():
 
     CU_UNIT = u.ph * u.cm**-2 * u.s**-1 * u.sr**-1 * u.AA**-1
     ERG_UNIT = u.erg * u.cm**-2 * u.s**-1 * u.arcsec**-2 * u.nm**-1
-    if UNIT == 'CU': UNIT = CU_UNIT
-    else: UNIT = ERG_UNIT
+    if UNIT == 'CU': units = CU_UNIT
+    else: units = ERG_UNIT
 
 
     # Wavelength grid from 912 to 1800 Å (dlam = 0.01 angstroms)
@@ -84,14 +84,14 @@ def main():
 
 
     # Incident UV background and attenuated source
-    if INC_SOURCE == 'BLACKBODY': uv_inc = blackbody(lam, THI, unit=UNIT)
-    else: uv_inc = uv_continuum(lam, unit=UNIT)                                   # empirical cont.
+    if INC_SOURCE == 'BLACKBODY': uv_inc = blackbody(lam, THI, unit=units)
+    else: uv_inc = uv_continuum(lam, unit=units)                                   # empirical cont.
     source = uv_inc * np.exp(-tau_tot)
 
 
     # Absorption rates for H2 only
     tau_h2 = tau[len(hi_lamlu):, :]
-    abs_rate = calc_abs_rate(uv_inc, tau_h2, tau_tot, unit=UNIT) * dlam     # Eq. 12–13
+    abs_rate = calc_abs_rate(uv_inc, tau_h2, tau_tot, unit=units) * dlam     # Eq. 12–13
     abs_rate_per_trans = np.sum(abs_rate, axis=1)
 
 
@@ -99,7 +99,7 @@ def main():
     plt.figure()
     plt.plot(lam, source, lw=0.5)
     plt.xlabel(r'Wavelength (\AA)')
-    if UNIT == CU_UNIT: plt.ylabel(r'Intensity (arbitrary units)') # CU)')
+    if units == CU_UNIT: plt.ylabel(r'Intensity (arbitrary units)') # CU)')
     else: plt.ylabel(r'Intensity ($\mathrm{erg\;cm^{-2}\;s^{-1}\;arcsec^{-1}\;nm^{-1}}$)')
     plt.title('Source Spectrum')
     plt.show()
@@ -128,7 +128,7 @@ def main():
 
     h2_lamlu = np.array(h2_lamlu) * u.AA
     h2_Atot = np.array(h2_Atot) * u.s**-1
-    flux_per_trans = np.array(flux_per_trans) * UNIT
+    flux_per_trans = np.array(flux_per_trans) * units
 
     lam0, lamend, dlam = 912, 1800, DLAM.to(u.AA).value
     lam_highres = np.linspace(int(lam0), int(lamend), int((lamend - lam0) / dlam)) * u.AA
@@ -137,18 +137,18 @@ def main():
 
     ### Calculate emergent spectrum
     # SPEED TESTING: following line took ~5.3 seconds to run on 2023 Mac Pro M3 Pro chip
-    lam_shifted, spec, spec_tot = calc_spec(lam_highres, h2_lamlu, h2_Atot, dv_tot, flux_per_trans, source, UNIT, DOPPLER_SHIFT)
+    lam_shifted, spec, spec_tot = calc_spec(lam_highres, h2_lamlu, h2_Atot, dv_tot, flux_per_trans, source, units, DOPPLER_SHIFT)
 
 
     ### Save emergent spectrum
-    np.savez_compressed(f'models/h2-fluor-model_R={RESOLVING_POWER}_TH2={int(TH2.value)}_NH2={int(np.log10(NH2_TOT.value))}_THI={int(THI.value)}_NHI={int(np.log10(NHI_TOT.value))}', lam_shifted=lam_shifted, spec=spec.to(UNIT).value, spec_tot=spec_tot.to(UNIT).value)
+    np.savez_compressed(f'models/h2-fluor-model_R={RESOLVING_POWER}_TH2={int(TH2.value)}_NH2={int(np.log10(NH2_TOT.value))}_THI={int(THI.value)}_NHI={int(np.log10(NHI_TOT.value))}', lam_shifted=lam_shifted, spec=spec.to(units).value, spec_tot=spec_tot.to(units).value)
 
 
     # Plot emission-only spectrum
     plt.plot(lam_shifted, spec, c='k', lw=0.5)
     plt.axvline(1608, 0, 1, c='r', lw=0.5, dashes=(8,4))
     plt.xlabel(r'Wavelength (\AA)')
-    if UNIT == CU_UNIT: plt.ylabel(r'Intensity (arbitrary units)') # CU)')
+    if units == CU_UNIT: plt.ylabel(r'Intensity (arbitrary units)') # CU)')
     else: plt.ylabel(r'Intensity ($\mathrm{erg\;cm^{-2}\;s^{-1}\;arcsec^{-1}\;nm^{-1}}$)')
     plt.xlim([BP_MIN.value, BP_MAX.value])
     plt.title('Emergent Spectrum')
@@ -159,7 +159,7 @@ def main():
     plt.plot(lam_shifted, spec_tot, c='k', lw=0.5)
     plt.axvline(1608, 0, 1, c='r', lw=0.5, dashes=(8,4))
     plt.xlabel(r'Wavelength (\AA)')
-    if UNIT == CU_UNIT: plt.ylabel(r'Intensity (arbitrary units)') # CU)')
+    if units == CU_UNIT: plt.ylabel(r'Intensity (arbitrary units)') # CU)')
     else: plt.ylabel(r'Intensity ($\mathrm{erg\;cm^{-2}\;s^{-1}\;arcsec^{-1}\;nm^{-1}}$)')
     plt.title('Emergent Spectrum w/ Continuum')
     plt.show()
