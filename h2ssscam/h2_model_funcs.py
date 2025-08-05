@@ -9,6 +9,8 @@ import astropy.constants as c
 from h2_model_params import *
 import numpy as np
 
+# Cole has been here!
+
 CU_UNIT = u.ph * u.cm**-2 * u.s**-1 * u.sr**-1 * u.AA**-1
 ERG_UNIT = u.erg * u.cm**-2 * u.s**-1 * u.arcsec**-2 * u.nm**-1
 
