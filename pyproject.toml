@@ -10,3 +10,12 @@ dependencies = [
     "numpy==2.2.6",
     "scipy==1.15.3",
 ]
+
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["h2ssscam"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+mypackage = ["data/*.npz"]
