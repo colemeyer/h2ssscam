@@ -27,7 +27,6 @@ def main():
     s = np.load('data/h2fluor_data_Abgrall+1993.npz', allow_pickle=True)
     Atot, Auldiss, Aul, lamlu, band, vu, ju, vl, jl = s['Atot'] * u.s**-1, s['Auldiss'] * u.s**-1, s['Aul'] * u.s**-1, s['lamlu'] * u.AA, s['band'], s['vu'], s['ju'], s['vl'], s['jl']
 
-
     # Filter by v <= VMAX, J <= JMAX
     mask_h2 = (vl <= VMAX) & (jl <= JMAX)
     Atot, Auldiss, Aul, lamlu, band, vu, ju, vl, jl = Atot[mask_h2], Auldiss[mask_h2], Aul[mask_h2], lamlu[mask_h2], band[mask_h2], vu[mask_h2], ju[mask_h2], vl[mask_h2], jl[mask_h2]
@@ -56,17 +55,18 @@ def main():
     lam = np.linspace(int(lam0), int(lamend), int((lamend - lam0) / dlam)) * u.AA
 
     # Compute Doppler widths
-    dv_phys, dv_tot = basecalc.calculate_doppler_widths(TH2, RESOLVING_POWER)
+    basecalc.dv_phys
+    basecalc.dv_tot
 
     # H2 oscillator strengths and level populations
-    flu = calc_flu(ju, jl, lamlu, Aul)  # Eq. 2
-    nvj = calc_nvj(NH2_TOT, TH2)        # Eq. 8
+    flu = basecalc.calc_flu(ju, jl, lamlu, Aul)  # Eq. 2
+    nvj = basecalc.calc_nvj(NH2_TOT, TH2)        # Eq. 8
     sel_levels = np.where(nvj[vl,jl] > NH2_CUTOFF)[0]
     Atot_p, lamlu_p, band_p, vu_p, ju_p, vl_p, jl_p, flu_p = Atot[sel_levels], lamlu[sel_levels], band[sel_levels], vu[sel_levels], ju[sel_levels], vl[sel_levels], jl[sel_levels], flu[sel_levels]
     nvj_p = nvj[vl_p, jl_p]
 
     # HI calculations
-    NHI = boltzmann(NHI_TOT, hi_ju, hi_jl, hi_lamlu, THI)
+    NHI = basecalc.boltzmann(NHI_TOT, hi_ju, hi_jl, hi_lamlu, THI)
     hih2_lamlu, hih2_flu, hih2_Atot, hih2_N = np.append(hi_lamlu, lamlu_p), np.append(hi_flu, flu_p), np.append(hi_Aul, Atot_p), np.append(NHI, nvj_p)
 
 
@@ -76,25 +76,19 @@ def main():
 
     # Compute absorption cross-sections and optical depths
     # SPEED TESTING: following 3 lines took ~0.6 seconds to run on 2023 Mac Pro M3 Pro chip
-    # siglu = calc_siglu(lam, hih2_lamlu, hih2_Atot, dv_phys, hih2_flu)  # Eq. 4
-
-    tau = basecalc.optical_depth(lam, hih2_lamlu, hih2_Atot, dv_phys, hih2_flu, hih2_N)
-    # tau = calc_tau(hih2_N, siglu)                                 # Eq. 11
-    tau_tot = basecalc.total_optical_depth()
-    # tau_tot = tau.sum(axis=0)                                    # total tau(lambda)
-
-
+    basecalc._siglu = basecalc._calc_siglu(lam, hih2_lamlu, hih2_Atot, basecalc.dv_phys, hih2_flu)
+    tau = basecalc.tau(hih2_N)
+    tau_tot = basecalc.tau_tot
+ 
     # Incident UV background and attenuated source
-    if INC_SOURCE == 'BLACKBODY': uv_inc = blackbody(lam, THI, unit=units)
-    else: uv_inc = uv_continuum(lam, unit=units)                                   # empirical cont.
+    if INC_SOURCE == 'BLACKBODY': uv_inc = basecalc.blackbody(lam, THI, unit=units)
+    else: uv_inc = basecalc.uv_continuum(lam, unit=units)                                   # empirical cont.
     source = uv_inc * np.exp(-tau_tot)
-
 
     # Absorption rates for H2 only
     tau_h2 = tau[len(hi_lamlu):, :]
-    abs_rate = calc_abs_rate(uv_inc, tau_h2, tau_tot, unit=units) * dlam     # Eq. 12–13
+    abs_rate = basecalc.calc_abs_rate(uv_inc, tau_h2, tau_tot, unit=units) * dlam     # Eq. 12–13
     abs_rate_per_trans = np.sum(abs_rate, axis=1)
-
 
     # Plot source spectrum
     plt.figure()
@@ -135,10 +129,9 @@ def main():
     lam_highres = np.linspace(int(lam0), int(lamend), int((lamend - lam0) / dlam)) * u.AA
     source = np.interp(lam_highres, lam, source)
 
-
     ### Calculate emergent spectrum
     # SPEED TESTING: following line took ~5.3 seconds to run on 2023 Mac Pro M3 Pro chip
-    lam_shifted, spec, spec_tot = calc_spec(lam_highres, h2_lamlu, h2_Atot, dv_tot, flux_per_trans, source, units, DOPPLER_SHIFT)
+    lam_shifted, spec, spec_tot = basecalc.calc_spec(lam_highres, h2_lamlu, h2_Atot, basecalc._dv_tot, flux_per_trans, source, units, DOPPLER_SHIFT)
 
 
     ### Save emergent spectrum
