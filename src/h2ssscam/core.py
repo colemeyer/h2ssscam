@@ -8,10 +8,9 @@ To be incorporated:
 """
 import matplotlib.pyplot as plt
 import astropy.units as u
-from funcs import *
-from constants import *
+from .funcs import *
+from .constants import *
 import numpy as np
-import time
 # from funkyfresh import set_style
 # set_style('AAS', silent=True)
 
