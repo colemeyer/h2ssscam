@@ -10,11 +10,14 @@ import matplotlib.pyplot as plt
 import astropy.units as u
 from funcs import *
 from constants import *
+from helpers import BaseCalc
 import numpy as np
 # from funkyfresh import set_style
 # set_style('AAS', silent=True)
 
 def main():
+
+    basecalc = BaseCalc()
 
     # ------------------------------------------------------ #
     # ----- LOAD H2 LINE DATA ------------------------------ #
@@ -55,8 +58,7 @@ def main():
 
 
     # Compute Doppler widths
-    dv_phys = calc_dv(T=TH2)               # thermal + non-thermal (Eq. 7)
-    dv_tot = calc_dv(T=TH2, R=RESOLVING_POWER, instr=True)      # include instrumental
+    dv_phys, dv_tot = basecalc.calculate_doppler_widths(TH2, RESOLVING_POWER)
 
 
     # H2 oscillator strengths and level populations

@@ -19,4 +19,3 @@ include-package-data = true
 
 [tool.setuptools.package-data]
 mypackage = ["data/*.npz"]
-
