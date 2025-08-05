@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from astropy.units import Quantity
 from scipy.special import wofz
 import astropy.constants as c
+import astropy.units as u
 import numpy as np
 
 @dataclass
@@ -26,7 +27,7 @@ class BaseCalc:
         self.tau_tot = self.tau.sum(axis=0) # total tau(lambda)
         return self.tau_tot
 
-    def _calc_tau(nvj, siglu):
+    def _calc_tau(self,nvj, siglu):
         """
         Compute optical depth tau(v,J,lambda).
 
@@ -48,7 +49,7 @@ class BaseCalc:
         """
         return (nvj[:,None] * siglu).decompose()
 
-    def _voigt(lam, lam0, gam, dv):
+    def _voigt(self, lam, lam0, gam, dv):
         """
         Compute Voigt profile H(a,y).
 

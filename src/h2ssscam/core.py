@@ -51,23 +51,19 @@ def main():
     if UNIT == 'CU': units = CU_UNIT
     else: units = ERG_UNIT
 
-
     # Wavelength grid from 912 to 1800 Å (dlam = 0.01 angstroms)
     lam0, lamend, dlam = 912, 1800, 0.1
     lam = np.linspace(int(lam0), int(lamend), int((lamend - lam0) / dlam)) * u.AA
 
-
     # Compute Doppler widths
     dv_phys, dv_tot = basecalc.calculate_doppler_widths(TH2, RESOLVING_POWER)
-
 
     # H2 oscillator strengths and level populations
     flu = calc_flu(ju, jl, lamlu, Aul)  # Eq. 2
     nvj = calc_nvj(NH2_TOT, TH2)        # Eq. 8
     sel_levels = np.where(nvj[vl,jl] > NH2_CUTOFF)[0]
-    Atot_p, Auldiss_p, Aul_p, lamlu_p, band_p, vu_p, ju_p, vl_p, jl_p, flu_p = Atot[sel_levels], Auldiss[sel_levels], Aul[sel_levels], lamlu[sel_levels], band[sel_levels], vu[sel_levels], ju[sel_levels], vl[sel_levels], jl[sel_levels], flu[sel_levels]
+    Atot_p, lamlu_p, band_p, vu_p, ju_p, vl_p, jl_p, flu_p = Atot[sel_levels], lamlu[sel_levels], band[sel_levels], vu[sel_levels], ju[sel_levels], vl[sel_levels], jl[sel_levels], flu[sel_levels]
     nvj_p = nvj[vl_p, jl_p]
-
 
     # HI calculations
     NHI = boltzmann(NHI_TOT, hi_ju, hi_jl, hi_lamlu, THI)
@@ -80,9 +76,12 @@ def main():
 
     # Compute absorption cross-sections and optical depths
     # SPEED TESTING: following 3 lines took ~0.6 seconds to run on 2023 Mac Pro M3 Pro chip
-    siglu = calc_siglu(lam, hih2_lamlu, hih2_Atot, dv_phys, hih2_flu)  # Eq. 4
-    tau = calc_tau(hih2_N, siglu)                                 # Eq. 11
-    tau_tot = tau.sum(axis=0)                                    # total tau(lambda)
+    # siglu = calc_siglu(lam, hih2_lamlu, hih2_Atot, dv_phys, hih2_flu)  # Eq. 4
+
+    tau = basecalc.optical_depth(lam, hih2_lamlu, hih2_Atot, dv_phys, hih2_flu, hih2_N)
+    # tau = calc_tau(hih2_N, siglu)                                 # Eq. 11
+    tau_tot = basecalc.total_optical_depth()
+    # tau_tot = tau.sum(axis=0)                                    # total tau(lambda)
 
 
     # Incident UV background and attenuated source
