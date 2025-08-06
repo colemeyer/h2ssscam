@@ -16,7 +16,7 @@ class BaseCalc:
     _siglu: Quantity = None
 
     @property
-    def dv_phys(self, T=TH2):
+    def dv_phys(self, T=TH2):   
         if self._dv_phys is None:
             self._dv_phys = self._calc_dv(T=T)  # thermal + non-thermal (Eq. 7)
         return self._dv_phys
@@ -35,6 +35,7 @@ class BaseCalc:
         return self._siglu
 
     def tau(self, hih2_N=None):
+        
         if self._tau is None:
             if self._siglu is None or hih2_N is None:
                 raise ValueError("Calculate siglu before...")
@@ -48,15 +49,17 @@ class BaseCalc:
                 raise ValueError("Calculate tau_tot before...")
             self._tau_tot = self._calc_tau_tot()
         return self._tau_tot
+     
 
     def calc_flu(self, ju, jl, lamlu, Aul):
-        """
-        Calculate oscillator strength f_lu from Einstein A coefficient.
+        """Calculate oscillator strength f_lu from Einstein A coefficient.
 
         Parameters
         ----------
-        ju, jl : array-like
-            Upper and lower rotational levels.
+        ju :array-like
+            Upper rotation levels
+        jl :array-like
+            Lower rotation levels
         lamlu : astropy.units.Quantity
             Transition wavelengths.
         Aul : astropy.units.Quantity
@@ -64,22 +67,22 @@ class BaseCalc:
 
         Returns
         -------
-        f_ul : array
+        array
             Oscillator strengths.
 
         Notes
         -----
-        - Implements Eq. 1 (McJunkin et al. 2016).
-        - Original code includes multiplicity (2s + 1); McJunkin et al. 2016 does not.
-        """
+            - Implements Eq. 1 (McJunkin et al. 2016).
+            - Original code includes multiplicity (2s + 1); McJunkin et al. 2016 does not.
+        """        
+       
         gu = 2 * ju + 1
         gl = 2 * jl + 1
         f = c.m_e * c.c / (8 * (np.pi * c.e.esu) ** 2) * (gu / gl) * lamlu**2 * Aul
         return f.decompose()
 
     def calc_nvj(self, ntot, T, vmax=VMAX, jmax=JMAX):
-        """
-        Compute level populations N_vJ for all v,J.
+        """Compute level populations N_vJ for all v,J.
 
         Parameters
         ----------
@@ -87,18 +90,21 @@ class BaseCalc:
             Total column density.
         T : astropy.units.Quantity
             Temperature.
-        vmax, jmax : int
-            Max vibrational and rotational levels.
+        vmax : int, optional
+            Max vibrational and rotational levels., by default VMAX
+        jmax : int, optional
+            Max vibrational and rotational levels., by default JMAX
 
         Returns
         -------
-        nvj : array
+        array
             Populations per level.
 
         Notes
         -----
         Implements Eq. 8 (McJunkin et al. 2016).
-        """
+        """        
+      
         vs = np.arange(vmax + 1)
         js = np.arange(jmax + 1)
         es = self._calc_e(vs, js)
@@ -110,15 +116,16 @@ class BaseCalc:
         return nvj
 
     def boltzmann(self, Ntot, ju, jl, lam, T):
-        """
-        Partitioning via Boltzmann distribution.
+        """Partitioning via Boltzmann distribution.
 
         Parameters
         ----------
         Ntot : astropy.units.Quantity
             Total column density.
-        ju, jl : int or array-like
-            Upper and lower rotational quantum numbers.
+        ju : int 
+            Upper rotational quantum numbers.
+        jl : int
+            Lower rotational quantum numbers.
         lam : astropy.units.Quantity
             Transition wavelength.
         T : astropy.units.Quantity
@@ -126,16 +133,16 @@ class BaseCalc:
 
         Returns
         -------
-        N_J : astropy.units.Quantity
+        astropy.units.Quantity
             Column density in lower level (cm^-2).
-        """
+        """        
+       
         gu, gl = 2 * ju**2, 2 * jl**2
         pop = Ntot * (gu / gl) * np.exp(-(c.h * c.c / (c.k_B * lam * T)).decompose())
         return pop.to(u.cm**-2)
 
     def blackbody(self, lam, temp, unit):
-        """
-        Compute the photon radiance of a blackbody at a given temperature.
+        """Compute the photon radiance of a blackbody at a given temperature.
 
         Parameters
         ----------
@@ -143,12 +150,15 @@ class BaseCalc:
             Wavelength array (e.g., in Å or m).
         temp : astropy.units.Quantity
             Blackbody temperature (e.g., in K).
+        unit : astropy.units.Quantity
+            Continuum units or CGS units.
 
         Returns
         -------
         astropy.units.Quantity
             Photon radiance [ph / (cm2 s sr Å)].
-        """
+        """        
+    
 
         # Planck spectral radiance B_lambda [W / (m2 sr m)]
         B_lambda = (2 * c.h * c.c**2 / lam**5) / np.expm1((c.h * c.c / (lam * c.k_B * temp)).decompose().value) / u.sr
@@ -161,25 +171,24 @@ class BaseCalc:
         return N_lambda.to(CU_UNIT)
 
     def uv_continuum(self, lam, unit):
-        """
-        Empirical UV continuum function.
+        """Empirical UV continuum function.
 
         Parameters
         ----------
         lam : astropy.units.Quantity
             Wavelength grid.
-        G0 : float
-            Interstellar UV field strength factor.
+        unit : astropy.units.Quantity
+            Continuum units or CGS units.
 
         Returns
         -------
-        cont : array
+        array
             Continuum intensity.
 
         Notes
         -----
         Original fit comes from Draine (1978).
-        """
+        """        
 
         ### EXACT FIT FROM DRAINE (1978)
         E = c.h * c.c / lam
@@ -194,8 +203,7 @@ class BaseCalc:
             return (F_E * (c.h * c.c / lam**2) * (c.h * c.c / lam) / u.ph).to(unit)
 
     def calc_abs_rate(self, I0, tau, tau_all, unit):
-        """
-        Compute absorbed rate per line.
+        """Compute absorbed rate per line.
 
         Parameters
         ----------
@@ -205,16 +213,19 @@ class BaseCalc:
             Line optical depths.
         tau_all : array
             Total optical depth across lines.
+        unit : astropy.units.Quantity
+            Continuum units or CGS units.
 
         Returns
         -------
-        abs_rate : array
+        array
             Absorption rates per line.
 
-        Notes
+         Notes
         -----
         Implements Eq. 12-13 (McJunkin et al. 2016).
-        """
+        """        
+        
         absr = np.zeros_like(tau) * unit
         for i in range(tau.shape[0]):
             tc = tau[i] / tau_all * tau[i]
@@ -222,8 +233,7 @@ class BaseCalc:
         return np.nan_to_num(absr)
 
     def calc_spec(self, lam, lamlu, Atot, dv, flux_per_trans, source, unit, dopp_v=0):
-        """
-        Build emergent spectrum from line profiles + continuum.
+        """Build emergent spectrum from line profiles + continuum.
 
         Parameters
         ----------
@@ -239,14 +249,23 @@ class BaseCalc:
             Flux per transition.
         source : array
             Continuum source function.
+        unit : astropy.units.Quantity
+            Continuum units or CGS units.
+        dopp_v : astropy.units.Quantity, optional
+            Doppler Velocity.
 
         Returns
         -------
-        spec_norm : array
+        array
+            Wavelength grid.
+
+        array
             Normalized emission-only spectrum.
-        spec_tot_norm : array
+
+        array
             Normalized total spectrum including continuum.
-        """
+        """        
+
         profiles = np.zeros((len(lamlu), len(lam))) * unit
         for i in range(len(lamlu)):
             profiles[i, :] = (
@@ -262,8 +281,7 @@ class BaseCalc:
         return lam_shifted, spec, spec_tot
 
     def _dopp_shift(self, lam, dopp_v):
-        """
-        Apply non-relativistic Doppler wavelength shift.
+        """Apply non-relativistic Doppler wavelength shift.
 
         Parameters
         ----------
@@ -271,12 +289,12 @@ class BaseCalc:
             Input wavelength array.
         dopp_v : astropy.units.Quantity
             Doppler shift velocity.
-
         Returns
         -------
-        lam_shifted : astropy.units.Quantity
+        astropy.units.Quantity
             Shifted wavelength(s): lambda' = lambda * (1 + v/c).
         """
+        
         return lam * (1 + dopp_v / c.c)
 
     def _calc_e(self, v, j):
@@ -292,7 +310,7 @@ class BaseCalc:
 
         Returns
         -------
-        E : astropy.units.Quantity
+        astropy.units.Quantity
             Energy in J (via h c k).
 
         Notes
@@ -347,8 +365,8 @@ class BaseCalc:
 
         Returns
         -------
-        tau : astropy.units.Quantity
-            Optical depth array.
+        astropy.units.Quantity
+            Optical depth as a function of wavelength and transition.
 
         Notes
         -----
@@ -357,6 +375,14 @@ class BaseCalc:
         return (nvj[:, None] * siglu).decompose()
 
     def _calc_tau_tot(self):
+        """
+        Sum optical depths over transitions.
+
+        Returns
+        -------
+        array
+            Optical depth as a function of wavelength.
+        """        
         self._tau_tot = self._tau.sum(axis=0)  # total tau(lambda)
         return self._tau_tot
 
@@ -377,7 +403,7 @@ class BaseCalc:
 
         Returns
         -------
-        H : array
+        array
             Voigt profile values.
 
         Notes
@@ -410,7 +436,7 @@ class BaseCalc:
 
         Returns
         -------
-        siglu : astropy.units.Quantity
+        astropy.units.Quantity
             sigma_lu(lambda) array in cm^2.
 
         Notes
@@ -440,7 +466,7 @@ class BaseCalc:
 
         Returns
         -------
-        dv : astropy.units.Quantity
+        astropy.units.Quantity
             Combined Doppler width (same units as c.c).
         """
         dv_therm = np.sqrt(2 * c.k_B * T / (2 * c.m_p))  # Thermal broadening
