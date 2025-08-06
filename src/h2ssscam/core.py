@@ -12,6 +12,7 @@ from .funcs import *
 from .constants import *
 from .helpers import BaseCalc
 import numpy as np
+from .data_loader import load_data
 
 # from funkyfresh import set_style
 # set_style('AAS', silent=True)
@@ -26,7 +27,7 @@ def main():
     # ------------------------------------------------------ #
 
     # Abgrall et al. (1993) fluorescence line list
-    s = np.load("data/h2fluor_data_Abgrall+1993.npz", allow_pickle=True)
+    s = load_data("h2fluor_data_Abgrall+1993")
     Atot, Auldiss, Aul, lamlu, band, vu, ju, vl, jl = (
         s["Atot"] * u.s**-1,
         s["Auldiss"] * u.s**-1,
@@ -58,7 +59,7 @@ def main():
     # ------------------------------------------------------ #
 
     # NIST Atomic Spectral Database for HI
-    s = np.load("data/hi_data_NIST.npz")
+    s = load_data("hi_data_NIST")
     hi_lamlu, hi_jl, hi_ju, hi_Aul, hi_flu = s["lamlu"] * u.AA, s["jl"], s["ju"], s["Aul"] * u.s**-1, s["flu"]
 
     # ------------------------------------------------------ #
