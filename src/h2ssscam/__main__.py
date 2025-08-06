@@ -177,7 +177,7 @@ def main():
 
     ### Save emergent spectrum
     np.savez_compressed(
-        f"models/h2-fluor-model_R={RESOLVING_POWER}_TH2={int(TH2.value)}_NH2={int(np.log10(NH2_TOT.value))}_THI={int(THI.value)}_NHI={int(np.log10(NHI_TOT.value))}",
+        f"h2-fluor-model_R={RESOLVING_POWER}_TH2={int(TH2.value)}_NH2={int(np.log10(NH2_TOT.value))}_THI={int(THI.value)}_NHI={int(np.log10(NHI_TOT.value))}",
         lam_shifted=lam_shifted,
         spec=spec.to(units).value,
         spec_tot=spec_tot.to(units).value,
