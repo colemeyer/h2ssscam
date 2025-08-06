@@ -9,9 +9,9 @@
 
 # @dataclass
 # class OpticalDepth(Spectrum):
-#     # optical_depth: 
+#     # optical_depth:
 #     _optical_depth: None | Quantity = None
-        
+
 #     @property
 #     def optical_depth(self):
 #         if self._optical_depth is None:

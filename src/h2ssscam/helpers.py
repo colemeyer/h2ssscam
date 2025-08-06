@@ -6,45 +6,47 @@ import astropy.constants as c
 import astropy.units as u
 import numpy as np
 
+
 @dataclass
 class BaseCalc:
-    _dv_phys : Quantity = None
-    _dv_tot : Quantity = None
-    _tau : Quantity = None
-    _tau_tot : Quantity = None
-    _siglu : Quantity = None
+    _dv_phys: Quantity = None
+    _dv_tot: Quantity = None
+    _tau: Quantity = None
+    _tau_tot: Quantity = None
+    _siglu: Quantity = None
 
     @property
-    def dv_phys(self,T=TH2):
+    def dv_phys(self, T=TH2):
         if self._dv_phys is None:
-            self._dv_phys = self._calc_dv(T=T) # thermal + non-thermal (Eq. 7)
+            self._dv_phys = self._calc_dv(T=T)  # thermal + non-thermal (Eq. 7)
         return self._dv_phys
+
     @property
-    def dv_tot(self,T=TH2,R=RESOLVING_POWER,instr=True):
+    def dv_tot(self, T=TH2, R=RESOLVING_POWER, instr=True):
         if self._dv_tot is None:
-            self._dv_tot = self._calc_dv(T=T, R=R, instr=instr)      # include instrumental
+            self._dv_tot = self._calc_dv(T=T, R=R, instr=instr)  # include instrumental
         return self._dv_tot
-    
+
     def siglu(self, lam=None, hih2_lamlu=None, hih2_Atot=None, hih2_flu=None):
         if self._siglu is None:
             if lam is None or hih2_lamlu is None or hih2_Atot is None or hih2_flu is None:
                 raise ValueError("Here's should be an offensive message. To be implemented...")
             self._siglu = self._calc_siglu(lam, hih2_lamlu, hih2_Atot, self.dv_phys, hih2_flu)
         return self._siglu
-        
-    def tau(self,hih2_N=None):
+
+    def tau(self, hih2_N=None):
         if self._tau is None:
             if self._siglu is None or hih2_N is None:
-                raise ValueError('Calculate siglu before...')
-            self._tau = self._calc_tau(hih2_N, self._siglu) 
+                raise ValueError("Calculate siglu before...")
+            self._tau = self._calc_tau(hih2_N, self._siglu)
         return self._tau
-    
+
     @property
     def tau_tot(self):
         if self._tau_tot is None:
             if self._tau is None:
-                raise ValueError('Calculate tau_tot before...')
-            self._tau_tot = self._calc_tau_tot() 
+                raise ValueError("Calculate tau_tot before...")
+            self._tau_tot = self._calc_tau_tot()
         return self._tau_tot
 
     def calc_flu(self, ju, jl, lamlu, Aul):
@@ -72,9 +74,8 @@ class BaseCalc:
         """
         gu = 2 * ju + 1
         gl = 2 * jl + 1
-        f = c.m_e * c.c / (8 * (np.pi * c.e.esu)**2) * (gu/gl) * lamlu**2 * Aul
+        f = c.m_e * c.c / (8 * (np.pi * c.e.esu) ** 2) * (gu / gl) * lamlu**2 * Aul
         return f.decompose()
-
 
     def calc_nvj(self, ntot, T, vmax=VMAX, jmax=JMAX):
         """
@@ -98,13 +99,13 @@ class BaseCalc:
         -----
         Implements Eq. 8 (McJunkin et al. 2016).
         """
-        vs = np.arange(vmax+1)
-        js = np.arange(jmax+1)
+        vs = np.arange(vmax + 1)
+        js = np.arange(jmax + 1)
         es = self._calc_e(vs, js)
         nvj = np.zeros((len(vs), len(js)))
         for i in range(nvj.shape[0]):
             for j in range(nvj.shape[1]):
-                nvj[i,j] = np.exp(-(es[i,j] / c.k_B / T).decompose())
+                nvj[i, j] = np.exp(-(es[i, j] / c.k_B / T).decompose())
         nvj = ntot * nvj / np.sum(nvj, axis=None, keepdims=False)
         return nvj
 
@@ -129,7 +130,7 @@ class BaseCalc:
             Column density in lower level (cm^-2).
         """
         gu, gl = 2 * ju**2, 2 * jl**2
-        pop = Ntot * (gu/gl) * np.exp(-(c.h * c.c / (c.k_B * lam * T)).decompose())
+        pop = Ntot * (gu / gl) * np.exp(-(c.h * c.c / (c.k_B * lam * T)).decompose())
         return pop.to(u.cm**-2)
 
     def blackbody(self, lam, temp, unit):
@@ -152,13 +153,14 @@ class BaseCalc:
         # Planck spectral radiance B_lambda [W / (m2 sr m)]
         B_lambda = (2 * c.h * c.c**2 / lam**5) / np.expm1((c.h * c.c / (lam * c.k_B * temp)).decompose().value) / u.sr
         B_lambda = B_lambda.to(ERG_UNIT)
-        if unit == ERG_UNIT: return B_lambda
+        if unit == ERG_UNIT:
+            return B_lambda
 
         # convert energy radiance to photon radiance:
         N_lambda = B_lambda * (u.ph / ((c.h * c.c) / lam))
         return N_lambda.to(CU_UNIT)
 
-    def uv_continuum(self,lam, unit):
+    def uv_continuum(self, lam, unit):
         """
         Empirical UV continuum function.
 
@@ -183,11 +185,13 @@ class BaseCalc:
         E = c.h * c.c / lam
         F_E_unit = u.ph * u.cm**-2 * u.s**-1 * u.sr**-1 * u.eV**-1
         a1, a2, a3 = 1.658e6 * F_E_unit, -2.152e5 * F_E_unit, 6.919e3 * F_E_unit
-        F_E = a1 * (E / u.eV) + a2 * (E / u.eV)**2 + a3 * (E / u.eV)**3
+        F_E = a1 * (E / u.eV) + a2 * (E / u.eV) ** 2 + a3 * (E / u.eV) ** 3
 
         ### CONVERT TO FUNCTION OF WAVELENGTH
-        if unit == CU_UNIT: return (F_E * (c.h*c.c/lam**2)).to(unit)
-        else: return (F_E * (c.h*c.c/lam**2) * (c.h * c.c / lam) / u.ph).to(unit)
+        if unit == CU_UNIT:
+            return (F_E * (c.h * c.c / lam**2)).to(unit)
+        else:
+            return (F_E * (c.h * c.c / lam**2) * (c.h * c.c / lam) / u.ph).to(unit)
 
     def calc_abs_rate(self, I0, tau, tau_all, unit):
         """
@@ -245,15 +249,19 @@ class BaseCalc:
         """
         profiles = np.zeros((len(lamlu), len(lam))) * unit
         for i in range(len(lamlu)):
-            profiles[i,:] = flux_per_trans[i] * self._voigt(lam, lamlu[i], Atot[i], dv) / np.trapezoid(self._voigt(lam, lamlu[i], Atot[i], dv), lam).value
+            profiles[i, :] = (
+                flux_per_trans[i]
+                * self._voigt(lam, lamlu[i], Atot[i], dv)
+                / np.trapezoid(self._voigt(lam, lamlu[i], Atot[i], dv), lam).value
+            )
 
         spec = np.sum(profiles, axis=0)
         spec_tot = spec + source
         lam_shifted = self._dopp_shift(lam, dopp_v)
-        
+
         return lam_shifted, spec, spec_tot
 
-    def _dopp_shift(self,lam, dopp_v):
+    def _dopp_shift(self, lam, dopp_v):
         """
         Apply non-relativistic Doppler wavelength shift.
 
@@ -291,29 +299,40 @@ class BaseCalc:
         -----
         - All constants are collected and organized by Huber & Herzberg 1979, p. 250. Specific references given below.
         """
-        om_e = 4400.39 * u.cm**-1 # Herzberg, Howe, CJP 16, 636 (1959); technically only valid for v=0...8 and residuals could be improved
-        x_e = (120.815 * u.cm**-1) / om_e # Herzberg, Howe, CJP 16, 636 (1959); technically only valid for v=0...8 and residuals could be improved
-        y_e = (0.7242 * u.cm**-1) / om_e # Herzberg, Howe, CJP 16, 636 (1959); technically only valid for v=0...8 and residuals could be improved
-        B_e = 60.864 * u.cm**-1 # Herzberg, Howe, CJP 16, 636 (1959); technically only valid for v=0...8 but residuals are small beyond that too. Good enough for our purposes.
-        D_e = 0.0471 * u.cm**-1 # Fink, Wiggins, Rank, JMS 18, 384 (1965).
-        H_e = 4.9e-5 * u.cm**-1 # Fink, Wiggins, Rank, JMS 18, 384 (1965).
-        a1, a2, a3 = 3.07638 * u.cm**-1, 0.06017 * u.cm**-1, 0.00481 * u.cm**-1 # Herzberg, Howe, CJP 16, 636 (1959); technically only valid for v=0...8 but residuals are small beyond that too. Good enough for our purposes.
-        b1, b2 = 0.00274 * u.cm**-1, 0.00040 * u.cm**-1 # Fink, Wiggins, Rank, JMS 18, 384 (1965).
-        c1 = 0.5e-5 * u.cm**-1 # Fink, Wiggins, Rank, JMS 18, 384 (1965).
+        om_e = (
+            4400.39 * u.cm**-1
+        )  # Herzberg, Howe, CJP 16, 636 (1959); technically only valid for v=0...8 and residuals could be improved
+        x_e = (
+            120.815 * u.cm**-1
+        ) / om_e  # Herzberg, Howe, CJP 16, 636 (1959); technically only valid for v=0...8 and residuals could be improved
+        y_e = (
+            0.7242 * u.cm**-1
+        ) / om_e  # Herzberg, Howe, CJP 16, 636 (1959); technically only valid for v=0...8 and residuals could be improved
+        B_e = (
+            60.864 * u.cm**-1
+        )  # Herzberg, Howe, CJP 16, 636 (1959); technically only valid for v=0...8 but residuals are small beyond that too. Good enough for our purposes.
+        D_e = 0.0471 * u.cm**-1  # Fink, Wiggins, Rank, JMS 18, 384 (1965).
+        H_e = 4.9e-5 * u.cm**-1  # Fink, Wiggins, Rank, JMS 18, 384 (1965).
+        a1, a2, a3 = (
+            3.07638 * u.cm**-1,
+            0.06017 * u.cm**-1,
+            0.00481 * u.cm**-1,
+        )  # Herzberg, Howe, CJP 16, 636 (1959); technically only valid for v=0...8 but residuals are small beyond that too. Good enough for our purposes.
+        b1, b2 = 0.00274 * u.cm**-1, 0.00040 * u.cm**-1  # Fink, Wiggins, Rank, JMS 18, 384 (1965).
+        c1 = 0.5e-5 * u.cm**-1  # Fink, Wiggins, Rank, JMS 18, 384 (1965).
 
         def single(vi, ji):
-            Bv = B_e - a1*(vi+0.5) + a2*(vi+0.5)**2 - a3*(vi+0.5)**3
-            Dv = -D_e + b1*(vi+0.5) - b2*(vi+0.5)**2
-            Hv = H_e - c1*(vi+0.5)
-            Gv = om_e*(vi+0.5) - om_e*x_e*(vi+0.5)**2 + om_e*y_e*(vi+0.5)**3
-            FJ = Bv*ji*(ji+1) - Dv*ji**2*(ji+1)**2 + Hv*ji**3*(ji+1)**3
+            Bv = B_e - a1 * (vi + 0.5) + a2 * (vi + 0.5) ** 2 - a3 * (vi + 0.5) ** 3
+            Dv = -D_e + b1 * (vi + 0.5) - b2 * (vi + 0.5) ** 2
+            Hv = H_e - c1 * (vi + 0.5)
+            Gv = om_e * (vi + 0.5) - om_e * x_e * (vi + 0.5) ** 2 + om_e * y_e * (vi + 0.5) ** 3
+            FJ = Bv * ji * (ji + 1) - Dv * ji**2 * (ji + 1) ** 2 + Hv * ji**3 * (ji + 1) ** 3
             return (c.h * c.c * (Gv + FJ)).to(u.eV)
 
         if np.ndim(v) == 1:
             return np.array([[single(vi, jj).value for jj in j] for vi in v]) * u.eV
         else:
             return single(v, j)
-
 
     def _calc_tau(self, nvj, siglu):
         """
@@ -335,10 +354,10 @@ class BaseCalc:
         -----
         Implements Eq. 11 (McJunkin et al. 2016).
         """
-        return (nvj[:,None] * siglu).decompose()
+        return (nvj[:, None] * siglu).decompose()
 
     def _calc_tau_tot(self):
-        self._tau_tot = self._tau.sum(axis=0) # total tau(lambda)
+        self._tau_tot = self._tau.sum(axis=0)  # total tau(lambda)
         return self._tau_tot
 
     def _voigt(self, lam, lam0, gam, dv):
@@ -401,11 +420,10 @@ class BaseCalc:
         siglu = np.zeros((len(lamlu), len(lam))) * u.cm**2
         for i in range(len(lamlu)):
             H_prof = self._voigt(lam, lamlu[i], Atot[i], dv)
-            siglu[i,:] = (np.sqrt(np.pi) * c.e.esu**2 / (c.m_e * c.c * dv)
-                        * flu[i] * lamlu[i] * H_prof).to(u.cm**2)
+            siglu[i, :] = (np.sqrt(np.pi) * c.e.esu**2 / (c.m_e * c.c * dv) * flu[i] * lamlu[i] * H_prof).to(u.cm**2)
         return siglu
 
-    def _calc_dv(self,T=TH2, b=VELOCITY_DISPERSION, R=RESOLVING_POWER, instr=False):
+    def _calc_dv(self, T=TH2, b=VELOCITY_DISPERSION, R=RESOLVING_POWER, instr=False):
         """
         Compute total Doppler width dv: thermal + non-thermal [+ instrumental].
 
@@ -425,9 +443,9 @@ class BaseCalc:
         dv : astropy.units.Quantity
             Combined Doppler width (same units as c.c).
         """
-        dv_therm = np.sqrt(2 * c.k_B * T / (2 * c.m_p)) # Thermal broadening
-        dv_nontherm = b # Non-thermal broadening
-        if instr and R: # Instrumental broadening
+        dv_therm = np.sqrt(2 * c.k_B * T / (2 * c.m_p))  # Thermal broadening
+        dv_nontherm = b  # Non-thermal broadening
+        if instr and R:  # Instrumental broadening
             dv_instr = c.c / (R * np.sqrt(8 * np.log(2)))
             return np.sqrt(dv_therm**2 + dv_nontherm**2 + dv_instr**2)
         return np.sqrt(dv_therm**2 + dv_nontherm**2)
