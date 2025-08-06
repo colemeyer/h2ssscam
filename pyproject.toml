@@ -19,3 +19,6 @@ include-package-data = true
 
 [tool.setuptools.package-data]
 mypackage = ["data/*.npz"]
+
+[package.scripts]
+h2ssscam = "src.h2ssscam.core:main"
