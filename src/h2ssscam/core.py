@@ -8,9 +8,9 @@ To be incorporated:
 """
 import matplotlib.pyplot as plt
 import astropy.units as u
-from funcs import *
-from constants import *
-from helpers import BaseCalc
+from .funcs import *
+from .constants import *
+from .helpers import BaseCalc
 import numpy as np
 
 # from funkyfresh import set_style
