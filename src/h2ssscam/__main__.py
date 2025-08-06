@@ -6,16 +6,22 @@ absorption rates, and plot emergent H₂ fluorescence spectrum.
 To be incorporated:
 - Dissociation spectrum
 """
+import os
+import pathlib
 import matplotlib.pyplot as plt
 import astropy.units as u
-from .funcs import *
-from .constants import *
-from .helpers import BaseCalc
+from h2ssscam.funcs import *
+from h2ssscam.constants import *
+from h2ssscam.helpers import BaseCalc
 import numpy as np
 from .data_loader import load_data
 
 # from funkyfresh import set_style
 # set_style('AAS', silent=True)
+
+base_dir = pathlib.Path(os.path.abspath(__file__)).parent
+data_dir = base_dir / "data"
+models_dir = base_dir / "models"
 
 
 def main():
@@ -59,7 +65,7 @@ def main():
     # ------------------------------------------------------ #
 
     # NIST Atomic Spectral Database for HI
-    s = load_data("hi_data_NIST")
+    s = load_data(base_dir / "data" / "hi_data_NIST")
     hi_lamlu, hi_jl, hi_ju, hi_Aul, hi_flu = s["lamlu"] * u.AA, s["jl"], s["ju"], s["Aul"] * u.s**-1, s["flu"]
 
     # ------------------------------------------------------ #
@@ -177,7 +183,7 @@ def main():
 
     ### Save emergent spectrum
     np.savez_compressed(
-        f"models/h2-fluor-model_R={RESOLVING_POWER}_TH2={int(TH2.value)}_NH2={int(np.log10(NH2_TOT.value))}_THI={int(THI.value)}_NHI={int(np.log10(NHI_TOT.value))}",
+        base_dir / "models" / f"h2-fluor-model_R={RESOLVING_POWER}_TH2={int(TH2.value)}_NH2={int(np.log10(NH2_TOT.value))}_THI={int(THI.value)}_NHI={int(np.log10(NHI_TOT.value))}",
         lam_shifted=lam_shifted,
         spec=spec.to(units).value,
         spec_tot=spec_tot.to(units).value,

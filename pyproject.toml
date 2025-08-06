@@ -11,14 +11,18 @@ dependencies = [
     "scipy==1.15.3",
 ]
 
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-packages = ["h2ssscam"]
-include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.setuptools.package-data]
 mypackage = ["data/*.npz"]
 
-[package.scripts]
-h2ssscam = "src.h2ssscam.core:main"
+[project.scripts]
+h2ssscam = "h2ssscam.__main__:main"

@@ -1,4 +1,4 @@
-from .constants import TH2, VMAX, JMAX, RESOLVING_POWER, VELOCITY_DISPERSION, CU_UNIT, ERG_UNIT
+from h2ssscam.constants import TH2, VMAX, JMAX, RESOLVING_POWER, VELOCITY_DISPERSION, CU_UNIT, ERG_UNIT
 from dataclasses import dataclass
 from astropy.units import Quantity
 from scipy.special import wofz
