@@ -5,3 +5,15 @@ The code is based on  "EMPIRICALLY ESTIMATED FAR-UV EXTINCTION CURVES FOR CLASSI
 
 
 <img src="H2SSSCAM_logo.png" alt="h2ssscam logo" width="500">
+
+### Installation Instructions
+1. Install `uv` via `pip` (`pip install uv`).
+2. Clone the repository.
+3. Navigate using the terminal to the repository directory.
+4. install the package (`uv pip install .`). If you want to edit the code after install and test it without reinstalling it, swap `.` for `-e .`.
+
+### Running the Code
+1. Run `h2ssscam` on the command line.
+2. Run `uv run h2ssscam` on the command line.
+
+Both options can be run from anywhere on your system.
