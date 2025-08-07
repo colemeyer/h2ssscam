@@ -13,7 +13,7 @@ from h2ssscam.constants import *
 from h2ssscam.BaseCalc import BaseCalc
 from h2ssscam.plotting_funcs import *
 import numpy as np
-from .data_loader import load_data
+from h2ssscam.data_loader import load_data
 
 # from funkyfresh import set_style
 # set_style('AAS', silent=True)
@@ -33,7 +33,7 @@ def main():
     # ------------------------------------------------------ #
 
     # Abgrall et al. (1993) fluorescence line list
-    s = load_data("h2fluor_data_Abgrall+1993")
+    s = load_data("h2fluor_data_Adfgfbgrall+1993")
     Atot, Auldiss, Aul, lamlu, band, vu, ju, vl, jl = (
         s["Atot"] * u.s**-1,
         s["Auldiss"] * u.s**-1,
