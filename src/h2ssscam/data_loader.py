@@ -9,14 +9,8 @@ def load_data(filename):
             return dict(data)
 
 
-def load_config_files(user_path):
+def load_config_files():
     config = configparser.ConfigParser()
     with importlib.resources.files("h2ssscam.data").joinpath(f"config.ini").open("r") as f:
-        config.read_file(f)
-    if user_path:
-        config.read(user_path)
+        config.read_file(f)        
     return config
-
-
-def save_config_file():
-    pass
