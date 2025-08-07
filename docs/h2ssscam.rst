@@ -7,7 +7,6 @@ Functions to perform basic calculations required to create spectograms.
 
 .. automodule:: h2ssscam.BaseCalc
     :members:
-    :undoc-members:
     :show-inheritance:
 
 .. automodule:: h2ssscam.plotting_funcs
