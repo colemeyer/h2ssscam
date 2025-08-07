@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to the h2ssscam documentation! 
+Welcome to the H2SSSCAM documentation! 
 ======================
 
 .. Add your content using ``reStructuredText`` syntax. See the
@@ -15,6 +15,6 @@ Welcome to the h2ssscam documentation!
    :maxdepth: 3
    :caption: Contents:
 
-   h2ssscam.rst
+   h2ssscam
 
 

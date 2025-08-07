@@ -37,3 +37,6 @@ dev = [
 
 [project.scripts]
 h2ssscam = "h2ssscam.__main__:main"
+
+[project.optional-dependencies]
+docs = ["sphinx", "sphinx_rtd_theme"]
