@@ -1,0 +1,28 @@
+[project]
+name = "h2ssscam"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "astropy==6.1.7",
+    "matplotlib==3.10.5",
+    "numpy==2.2.6",
+    "scipy==1.15.3",
+]
+
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+mypackage = ["data/*"]
+
+[project.scripts]
+h2ssscam = "h2ssscam.__main__:main"
