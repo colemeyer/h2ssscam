@@ -128,39 +128,9 @@ class Constants:
         output_path : str
             Output file path
         """
-        self.set_value("vmax", self.VMAX)
-        self.set_value("jmax", self.JMAX)
-        # model bandpass lambda in [1380,1620] angstroms
-        self.set_value("bp_min", self.BP_MIN)
-        self.set_value("bp_max", self.BP_MAX)
-        # A_ul/A_tot threshold to include a transition
-        self.set_value("line_strength_cutoff", self.LINE_STRENGTH_CUTOFF)
-        # instrument resolving power, None = ignore instrumental broadening
-        self.set_value("resolving_power", self.RESOLVING_POWER)
-        # plotting units; can be 'CU' or 'ERGS'
-        self.set_value("unit", self.UNIT)
-        # wavelength sampling
-        self.set_value("dlam", self.DLAM)
+        for key in self.config["PARAMETERS"]:
+            self.set_value(key, getattr(self, key.upper()))
 
-        # H₂ GAS PARAMETERS
-        # kinetic temperature of H2 gas
-        self.set_value("th2", self.TH2)
-        # total H2 column density
-        self.set_value("nh2_tot", self.NH2_TOT)
-        # per-level column density cutoff
-        self.set_value("nh2_cutoff", self.NH2_CUTOFF)
-        # non-thermal Doppler b-value
-        self.set_value("velocity_dispersion", self.VELOCITY_DISPERSION)
-        # positive is moving away from us; rho Oph has v_r = -11.4 km/s, zeta Oph has -9 km/s
-        self.set_value("doppler_shift", self.DOPPLER_SHIFT)
-
-        # HI PARAMETERS
-        # kinetic temperature of HI
-        self.set_value("thi", self.THI)
-        # total HI column density
-        self.set_value("nhi_tot", self.NHI_TOT)
-        # incident source; can be 'BLACKBODY' or 'ISRF'
-        self.set_value("inc_source", self.INC_SOURCE)
         with open(output_path, "w") as configfile:
             self.config.write(configfile)
 
