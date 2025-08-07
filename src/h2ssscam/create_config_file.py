@@ -14,11 +14,15 @@ def create_config_file(output_path: str,file_name:str|None = None):
     """
     if not isinstance(output_path, str):
         raise TypeError("Path has to be a string")
+    if not os.path.exists(output_path):
+        raise ValueError(f'Directory {output_path} does NOT exists')
     timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
     with importlib.resources.files("h2ssscam.data").joinpath(f"config.ini").open("r") as f:
         config_content = f.read()
     if file_name:
         output_file = os.path.join(output_path, f"{file_name}.ini")
+        if os.path.isfile(output_file):
+            raise ValueError('File already exists!')
     else:
         output_file = os.path.join(output_path, f"config_{timestamp}.ini")
     with open(output_file, "w") as out:
