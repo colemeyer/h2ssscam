@@ -48,7 +48,8 @@ class Constants:
         self.INC_SOURCE = self.value("inc_source", parameter_type=str)
 
     def value(self, parameter_name, parameter_type=float):
-        """Load a parameter value from the configparser and transform it to float if required
+        """
+        Load a parameter value from the configparser and transform it to float if required
 
         Parameters
         ----------
@@ -75,7 +76,8 @@ class Constants:
         return parameter
 
     def _set_value(self, parameter_name, value):
-        """Updates value in configparser
+        """
+        Updates value in configparser
 
         Parameters
         ----------
@@ -91,7 +93,8 @@ class Constants:
         self.config["PARAMETERS"][parameter_name] = value
 
     def read_config_files(self, user_config_path):
-        """Loads default config file from the package and user's config file if specified
+        """
+        Loads default config file from the package and user's config file if specified
 
         Parameters
         ----------
@@ -114,7 +117,8 @@ class Constants:
         return config
 
     def save_config_file(self, output_path):
-        """Save config file with currently used parameters value
+        """
+        Save config file with currently used parameters value
 
         Parameters
         ----------
