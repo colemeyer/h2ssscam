@@ -136,3 +136,5 @@ class Constants:
 
         with open(output_file, "w") as configfile:
             self.config.write(configfile)
+
+Constants.__doc__ = None
