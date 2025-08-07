@@ -22,7 +22,7 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.setuptools.package-data]
-mypackage = ["data/*"]
+h2ssscam  = ["data/*"]
 
 [project.scripts]
 h2ssscam = "h2ssscam.__main__:main"

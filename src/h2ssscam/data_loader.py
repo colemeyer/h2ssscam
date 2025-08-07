@@ -17,14 +17,3 @@ def load_config_files():
     with importlib.resources.files("h2ssscam.data").joinpath(f"config.ini").open("r") as f:
         config.read_file(f)
     return config
-
-
-def create_config_file(output_path: str):
-    timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
-    with importlib.resources.files("h2ssscam.data").joinpath(f"config.ini").open("r") as f:
-        config_content = f.read()
-
-    output_file = os.path.join(output_path, f"config_{timestamp}.ini")
-    with open(output_file, "w") as out:
-        out.write(config_content)
-    print(f"Config file saved as {output_file}")
