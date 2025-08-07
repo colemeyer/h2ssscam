@@ -20,7 +20,8 @@ You're now ready to use the `h2ssscam` package! To run the code, execute the fol
 The user may also modify the input parameters for the model. To do so, navigate into the desired directory and run in the terminal<br>
     `% python -m h2ssscam.create_config_file [directory] [config file name]`<br>
 If the user would like to save the config file in the current directory, they should specify `.` in place of `[directory]`. Note that the file extension for the created configuration file will always be `.ini` (even if the user specifies some other extension) to satisfy code requirements. Modify the desired parameters and run the model as usual by executing the following in the terminal:<br>
-    `% python -m h2ssscam [directory] [config file name]`
+    `% python -m h2ssscam [directory]/[config file name]`
+
 
 **Note that package dependencies for `h2ssscam` are managed using the `uv` package manager. Advanced users are encouraged to run `h2ssscam` using `uv` functionalities (e.g., `uv run h2ssscam`).**
 
