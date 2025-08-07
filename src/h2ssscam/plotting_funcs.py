@@ -12,6 +12,36 @@ def plot_spectrum(wavelengths,
                   ylabel=None,
                   title=r"Spectrum",
                   show=False):
+    """Plots intensity over wavelength.
+
+    Parameters
+    ----------
+    wavelengths : array
+        Grid of equally spaced wavelength points.
+    intensity : array
+        Grid of corresponding intensity points.
+    xmin : float, optional
+        Minimum value on the x-axis, by default None
+    xmax : float, optional
+        Maximum value on the x-axis, by default None
+    ymin : float, optional
+        Minimum value on the y-axis, by default None
+    ymax : float, optional
+        aximum value on the y-axis, by default None
+    units : astropy.units.Quantity, optional
+        Chosen units for intensity, by default None
+    ylabel : str, optional
+        Label on the y-axis, by default None
+    title : regexp, optional
+        Title of the Plot, by default r"Spectrum"
+    show : bool, optional
+        Option to display plot, by default False
+
+    Raises
+    ------
+    ValueError
+        
+    """    
 
     plt.figure()
     plt.plot(wavelengths, intensity, lw=0.5)

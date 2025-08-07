@@ -1,9 +1,18 @@
-.. _function:
+.. _basecalcs:
 
-Functions
+H2SSSCAM Modules
 =====================
 
-Function to perform correlations.
+Functions to perform basic calculations required to create spectograms.
 
-.. automodule:: helpers
-   :members:
+.. automodule:: h2ssscam.BaseCalc
+    :members:
+    :show-inheritance:
+
+.. automodule:: h2ssscam.plotting_funcs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+
