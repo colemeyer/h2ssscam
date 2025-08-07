@@ -1,5 +1,4 @@
 import astropy.units as u
-import configparser
 import os
 from .data_loader import load_config_files
 
@@ -41,41 +40,60 @@ class Constants:
 
         # LINE PARAMETERS
         # max vibrational (v) and rotational (J) levels for Lyman–Werner bands
-        self.VMAX = self.value("VMAX")
-        self.JMAX = self.value("JMAX")
+        self.VMAX = self.value("vmax")
+        self.JMAX = self.value("jmax")
         # model bandpass lambda in [1380,1620] angstroms
-        self.BP_MIN = self.value("BP_MIN") * u.AA
-        self.BP_MAX = self.value("BP_MAX") * u.AA
+        self.BP_MIN = self.value("bp_min") * u.AA
+        self.BP_MAX = self.value("bp_max") * u.AA
         # A_ul/A_tot threshold to include a transition
-        self.LINE_STRENGTH_CUTOFF = self.value("LINE_STRENGTH_CUTOFF")
+        self.LINE_STRENGTH_CUTOFF = self.value("line_strength_cutoff")
         # instrument resolving power, None = ignore instrumental broadening
-        self.RESOLVING_POWER = self.value
+        self.RESOLVING_POWER = self.value("resolving_power")
         # plotting units; can be 'CU' or 'ERGS'
-        self.UNIT = self.value("UNIT", parameter_type=str)
+        self.UNIT = self.value("unit", parameter_type=str)
         # wavelength sampling
-        self.DLAM = self.value("DLAM") * u.AA
+        self.DLAM = self.value("dlam") * u.AA
 
         # H₂ GAS PARAMETERS
         # kinetic temperature of H2 gas
-        self.TH2 = self.value("TH2") * u.K
+        self.TH2 = self.value("th2") * u.K
         # total H2 column density
-        self.NH2_TOT = self.value("NH2_TOT") * u.cm**-2
+        self.NH2_TOT = self.value("nh2_tot") * u.cm**-2
         # per-level column density cutoff
-        self.NH2_CUTOFF = self.value("NH2_CUTOFF") * u.cm**-2
+        self.NH2_CUTOFF = self.value("nh2_cutoff") * u.cm**-2
         # non-thermal Doppler b-value
-        self.VELOCITY_DISPERSION = self.value("VELOCITY_DISPERSION") * u.km / u.s
+        self.VELOCITY_DISPERSION = self.value("velocity_dispersion") * u.km / u.s
         # positive is moving away from us; rho Oph has v_r = -11.4 km/s, zeta Oph has -9 km/s
-        self.DOPPLER_SHIFT = self.value("DOPPLER_SHIFT") * u.km / u.s
+        self.DOPPLER_SHIFT = self.value("doppler_shift") * u.km / u.s
 
         # HI PARAMETERS
         # kinetic temperature of HI
-        self.THI = self.value("THI") * u.K
+        self.THI = self.value("thi") * u.K
         # total HI column density
-        self.NHI_TOT = self.value("NHI_TOT") * u.cm**-2
+        self.NHI_TOT = self.value("nhi_tot") * u.cm**-2
         # incident source; can be 'BLACKBODY' or 'ISRF'
-        self.INC_SOURCE = self.value("INC_SOURCE")
+        self.INC_SOURCE = self.value("inc_source", parameter_type=str)
 
     def value(self, parameter_name, parameter_type=float):
+        """Load a parameter value from the configparser and transform it to float if required
+
+        Parameters
+        ----------
+        parameter_name : str
+            Name of a parameter
+        parameter_type : type, optional
+            Transform parameter value into this type; configparser stores everything as strings. Only float is implemented, and by default float
+
+        Returns
+        -------
+        str | float
+
+
+        Raises
+        ------
+        ValueError
+            If parameter is not defined in the config file
+        """
         parameter = self.config["PARAMETERS"].get(parameter_name)
         if parameter is None:
             raise ValueError(f"Missing parameter {parameter} in config files")
@@ -83,17 +101,68 @@ class Constants:
             return float(parameter)
         return parameter
 
+    def set_value(self, parameter_name, value):
+        if type(value) == u.Quantity:
+            value = value.value
+        if type(value) != str:
+            value = str(value)
+        self.config["PARAMETERS"][parameter_name] = value
+
     def read_config_files(self, user_config_path):
+        config = load_config_files()
+        if user_config_path is None:
+            return config
         if not os.path.isfile(user_config_path):
             raise ValueError("Incorrect path to user config file")
         if not isinstance(user_config_path, str):
             raise TypeError("Incorrect type of path. String please")
-        self.config = load_config_files(user_config_path)
-        if user_config_path:
-            self.config.read(user_config_path)
+        config.read(user_config_path)
+
+        return config
 
     def save_config_file(self, output_path):
-        pass
+        """Save config file with currently used parameters value
+
+        Parameters
+        ----------
+        output_path : str
+            Output file path
+        """
+        self.set_value("vmax", self.VMAX)
+        self.set_value("jmax", self.JMAX)
+        # model bandpass lambda in [1380,1620] angstroms
+        self.set_value("bp_min", self.BP_MIN)
+        self.set_value("bp_max", self.BP_MAX)
+        # A_ul/A_tot threshold to include a transition
+        self.set_value("line_strength_cutoff", self.LINE_STRENGTH_CUTOFF)
+        # instrument resolving power, None = ignore instrumental broadening
+        self.set_value("resolving_power", self.RESOLVING_POWER)
+        # plotting units; can be 'CU' or 'ERGS'
+        self.set_value("unit", self.UNIT)
+        # wavelength sampling
+        self.set_value("dlam", self.DLAM)
+
+        # H₂ GAS PARAMETERS
+        # kinetic temperature of H2 gas
+        self.set_value("th2", self.TH2)
+        # total H2 column density
+        self.set_value("nh2_tot", self.NH2_TOT)
+        # per-level column density cutoff
+        self.set_value("nh2_cutoff", self.NH2_CUTOFF)
+        # non-thermal Doppler b-value
+        self.set_value("velocity_dispersion", self.VELOCITY_DISPERSION)
+        # positive is moving away from us; rho Oph has v_r = -11.4 km/s, zeta Oph has -9 km/s
+        self.set_value("doppler_shift", self.DOPPLER_SHIFT)
+
+        # HI PARAMETERS
+        # kinetic temperature of HI
+        self.set_value("thi", self.THI)
+        # total HI column density
+        self.set_value("nhi_tot", self.NHI_TOT)
+        # incident source; can be 'BLACKBODY' or 'ISRF'
+        self.set_value("inc_source", self.INC_SOURCE)
+        with open(output_path, "w") as configfile:
+            self.config.write(configfile)
 
 
 # ========== FILE: h2_model_constants.py ==========
