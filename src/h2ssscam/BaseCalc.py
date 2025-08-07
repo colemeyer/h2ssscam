@@ -221,8 +221,8 @@ class BaseCalc:
         array
             Absorption rates per line.
 
-         Notes
-        -----
+        Notes
+        ------
         Implements Eq. 12-13 (McJunkin et al. 2016).
         """        
         

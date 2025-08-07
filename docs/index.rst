@@ -12,7 +12,7 @@ Welcome to the h2ssscam documentation!
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    h2ssscam.rst
