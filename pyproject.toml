@@ -1,6 +1,6 @@
 [project]
 name = "h2ssscam"
-version = "0.2.3"
+version = "0.2.4"
 description = "Synthetic H2 fluorescence code refactored by Cole Meyer, Daniel Lopez-Sanders, Cassandra S. Cruz, Dominik P. Pacholski during Code/Astro 2025. The code is based on ``EMPIRICALLY ESTIMATED FAR-UV EXTINCTION CURVES FOR CLASSICAL T TAURI STARS'', McJunkin, M., France, K., Schindhelm, R., Herczeg, G., Schneider, P. C., & Brown, A. (2016), ApJ, 828, 69."
 readme = "README.md"
 requires-python = ">=3.10"
