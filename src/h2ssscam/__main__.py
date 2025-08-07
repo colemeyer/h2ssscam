@@ -13,7 +13,7 @@ from h2ssscam.BaseCalc import BaseCalc
 from h2ssscam.plotting_funcs import *
 import numpy as np
 from .data_loader import load_data
-from .constants import Constants
+from .Constants import Constants
 
 # from funkyfresh import set_style
 # set_style('AAS', silent=True)
