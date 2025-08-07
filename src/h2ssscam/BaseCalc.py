@@ -1,14 +1,15 @@
-from h2ssscam.constants import TH2, VMAX, JMAX, RESOLVING_POWER, VELOCITY_DISPERSION, CU_UNIT, ERG_UNIT
 from dataclasses import dataclass
 from astropy.units import Quantity
 from scipy.special import wofz
 import astropy.constants as c
 import astropy.units as u
 import numpy as np
+from .constants import Constants
 
 
 @dataclass
 class BaseCalc:
+    constant: Constants
     _dv_phys: Quantity = None
     _dv_tot: Quantity = None
     _tau: Quantity = None
@@ -16,15 +17,15 @@ class BaseCalc:
     _siglu: Quantity = None
 
     @property
-    def dv_phys(self, T=TH2):   
+    def dv_phys(self):
         if self._dv_phys is None:
-            self._dv_phys = self._calc_dv(T=T)  # thermal + non-thermal (Eq. 7)
+            self._dv_phys = self._calc_dv()  # thermal + non-thermal (Eq. 7)
         return self._dv_phys
 
     @property
-    def dv_tot(self, T=TH2, R=RESOLVING_POWER, instr=True):
+    def dv_tot(self, instr=True):
         if self._dv_tot is None:
-            self._dv_tot = self._calc_dv(T=T, R=R, instr=instr)  # include instrumental
+            self._dv_tot = self._calc_dv(instr=instr)  # include instrumental
         return self._dv_tot
 
     def siglu(self, lam=None, hih2_lamlu=None, hih2_Atot=None, hih2_flu=None):
@@ -35,7 +36,7 @@ class BaseCalc:
         return self._siglu
 
     def tau(self, hih2_N=None):
-        
+
         if self._tau is None:
             if self._siglu is None or hih2_N is None:
                 raise ValueError("Calculate siglu before...")
@@ -49,7 +50,14 @@ class BaseCalc:
                 raise ValueError("Calculate tau_tot before...")
             self._tau_tot = self._calc_tau_tot()
         return self._tau_tot
-     
+    def reset_parameters(self):
+        """Clean calculated and stored values
+        """        
+        self._dv_phys = None
+        self._dv_tot = None
+        self._tau = None
+        self._tau_tot = None
+        self._siglu = None
 
     def calc_flu(self, ju, jl, lamlu, Aul):
         """Calculate oscillator strength f_lu from Einstein A coefficient.
@@ -74,14 +82,14 @@ class BaseCalc:
         -----
             - Implements Eq. 1 (McJunkin et al. 2016).
             - Original code includes multiplicity (2s + 1); McJunkin et al. 2016 does not.
-        """        
-       
+        """
+
         gu = 2 * ju + 1
         gl = 2 * jl + 1
         f = c.m_e * c.c / (8 * (np.pi * c.e.esu) ** 2) * (gu / gl) * lamlu**2 * Aul
         return f.decompose()
 
-    def calc_nvj(self, ntot, T, vmax=VMAX, jmax=JMAX):
+    def calc_nvj(self, ntot, T):
         """Compute level populations N_vJ for all v,J.
 
         Parameters
@@ -103,10 +111,10 @@ class BaseCalc:
         Notes
         -----
         Implements Eq. 8 (McJunkin et al. 2016).
-        """        
-      
-        vs = np.arange(vmax + 1)
-        js = np.arange(jmax + 1)
+        """
+
+        vs = np.arange(self.constant.VMAX + 1)
+        js = np.arange(self.constant.JMAX + 1)
         es = self._calc_e(vs, js)
         nvj = np.zeros((len(vs), len(js)))
         for i in range(nvj.shape[0]):
@@ -122,7 +130,7 @@ class BaseCalc:
         ----------
         Ntot : astropy.units.Quantity
             Total column density.
-        ju : int 
+        ju : int
             Upper rotational quantum numbers.
         jl : int
             Lower rotational quantum numbers.
@@ -135,8 +143,8 @@ class BaseCalc:
         -------
         astropy.units.Quantity
             Column density in lower level (cm^-2).
-        """        
-       
+        """
+
         gu, gl = 2 * ju**2, 2 * jl**2
         pop = Ntot * (gu / gl) * np.exp(-(c.h * c.c / (c.k_B * lam * T)).decompose())
         return pop.to(u.cm**-2)
@@ -157,18 +165,17 @@ class BaseCalc:
         -------
         astropy.units.Quantity
             Photon radiance [ph / (cm2 s sr Å)].
-        """        
-    
+        """
 
         # Planck spectral radiance B_lambda [W / (m2 sr m)]
         B_lambda = (2 * c.h * c.c**2 / lam**5) / np.expm1((c.h * c.c / (lam * c.k_B * temp)).decompose().value) / u.sr
-        B_lambda = B_lambda.to(ERG_UNIT)
-        if unit == ERG_UNIT:
+        B_lambda = B_lambda.to(self.constant.ERG_UNIT)
+        if unit == self.constant.ERG_UNIT:
             return B_lambda
 
         # convert energy radiance to photon radiance:
         N_lambda = B_lambda * (u.ph / ((c.h * c.c) / lam))
-        return N_lambda.to(CU_UNIT)
+        return N_lambda.to(self.constant.CU_UNIT)
 
     def uv_continuum(self, lam, unit):
         """Empirical UV continuum function.
@@ -188,7 +195,7 @@ class BaseCalc:
         Notes
         -----
         Original fit comes from Draine (1978).
-        """        
+        """
 
         ### EXACT FIT FROM DRAINE (1978)
         E = c.h * c.c / lam
@@ -197,7 +204,7 @@ class BaseCalc:
         F_E = a1 * (E / u.eV) + a2 * (E / u.eV) ** 2 + a3 * (E / u.eV) ** 3
 
         ### CONVERT TO FUNCTION OF WAVELENGTH
-        if unit == CU_UNIT:
+        if unit == self.constant.CU_UNIT:
             return (F_E * (c.h * c.c / lam**2)).to(unit)
         else:
             return (F_E * (c.h * c.c / lam**2) * (c.h * c.c / lam) / u.ph).to(unit)
@@ -221,11 +228,11 @@ class BaseCalc:
         array
             Absorption rates per line.
 
-         Notes
-        -----
+        Notes
+        ------
         Implements Eq. 12-13 (McJunkin et al. 2016).
-        """        
-        
+        """
+
         absr = np.zeros_like(tau) * unit
         for i in range(tau.shape[0]):
             tc = tau[i] / tau_all * tau[i]
@@ -264,7 +271,7 @@ class BaseCalc:
 
         array
             Normalized total spectrum including continuum.
-        """        
+        """
 
         profiles = np.zeros((len(lamlu), len(lam))) * unit
         for i in range(len(lamlu)):
@@ -294,7 +301,7 @@ class BaseCalc:
         astropy.units.Quantity
             Shifted wavelength(s): lambda' = lambda * (1 + v/c).
         """
-        
+
         return lam * (1 + dopp_v / c.c)
 
     def _calc_e(self, v, j):
@@ -382,7 +389,7 @@ class BaseCalc:
         -------
         array
             Optical depth as a function of wavelength.
-        """        
+        """
         self._tau_tot = self._tau.sum(axis=0)  # total tau(lambda)
         return self._tau_tot
 
@@ -449,7 +456,7 @@ class BaseCalc:
             siglu[i, :] = (np.sqrt(np.pi) * c.e.esu**2 / (c.m_e * c.c * dv) * flu[i] * lamlu[i] * H_prof).to(u.cm**2)
         return siglu
 
-    def _calc_dv(self, T=TH2, b=VELOCITY_DISPERSION, R=RESOLVING_POWER, instr=False):
+    def _calc_dv(self, instr=False):
         """
         Compute total Doppler width dv: thermal + non-thermal [+ instrumental].
 
@@ -469,9 +476,9 @@ class BaseCalc:
         astropy.units.Quantity
             Combined Doppler width (same units as c.c).
         """
-        dv_therm = np.sqrt(2 * c.k_B * T / (2 * c.m_p))  # Thermal broadening
-        dv_nontherm = b  # Non-thermal broadening
-        if instr and R:  # Instrumental broadening
-            dv_instr = c.c / (R * np.sqrt(8 * np.log(2)))
+        dv_therm = np.sqrt(2 * c.k_B * self.constant.TH2 / (2 * c.m_p))  # Thermal broadening
+        dv_nontherm = self.constant.VELOCITY_DISPERSION  # Non-thermal broadening
+        if instr and self.constant.RESOLVING_POWER:  # Instrumental broadening
+            dv_instr = c.c / (self.constant.RESOLVING_POWER * np.sqrt(8 * np.log(2)))
             return np.sqrt(dv_therm**2 + dv_nontherm**2 + dv_instr**2)
         return np.sqrt(dv_therm**2 + dv_nontherm**2)

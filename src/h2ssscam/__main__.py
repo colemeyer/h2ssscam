@@ -6,14 +6,14 @@ absorption rates, and plot emergent H₂ fluorescence spectrum.
 To be incorporated:
 - Dissociation spectrum
 """
-import os
+import os, sys
 import pathlib
 import astropy.units as u
-from h2ssscam.constants import *
 from h2ssscam.BaseCalc import BaseCalc
 from h2ssscam.plotting_funcs import *
 import numpy as np
 from h2ssscam.data_loader import load_data
+from h2ssscam.constants import Constants
 
 # from funkyfresh import set_style
 # set_style('AAS', silent=True)
@@ -25,8 +25,9 @@ models_dir = base_dir / "models"
 
 def main():
 
-    basecalc = BaseCalc()
-
+    config_file_path = sys.argv[1] if len(sys.argv) == 2 else None
+    constant = Constants(config_file_path)
+    basecalc = BaseCalc(constant)
 
     # ------------------------------------------------------ #
     # ----- LOAD H2 LINE DATA ------------------------------ #
@@ -47,7 +48,7 @@ def main():
     )
 
     # Filter by v <= VMAX, J <= JMAX
-    mask_h2 = (vl <= VMAX) & (jl <= JMAX)
+    mask_h2 = (vl <= constant.VMAX) & (jl <= constant.JMAX)
     Atot, Auldiss, Aul, lamlu, band, vu, ju, vl, jl = (
         Atot[mask_h2],
         Auldiss[mask_h2],
@@ -74,7 +75,7 @@ def main():
 
     CU_UNIT = u.ph * u.cm**-2 * u.s**-1 * u.sr**-1 * u.AA**-1
     ERG_UNIT = u.erg * u.cm**-2 * u.s**-1 * u.arcsec**-2 * u.nm**-1
-    if UNIT == "CU":
+    if constant.UNIT == "CU":
         units = CU_UNIT
     else:
         units = ERG_UNIT
@@ -89,8 +90,8 @@ def main():
 
     # H2 oscillator strengths and level populations
     flu = basecalc.calc_flu(ju, jl, lamlu, Aul)  # Eq. 2
-    nvj = basecalc.calc_nvj(NH2_TOT, TH2)  # Eq. 8
-    sel_levels = np.where(nvj[vl, jl] > NH2_CUTOFF)[0]
+    nvj = basecalc.calc_nvj(constant.NH2_TOT, constant.TH2)  # Eq. 8
+    sel_levels = np.where(nvj[vl, jl] > constant.NH2_CUTOFF)[0]
     Atot_p, lamlu_p, band_p, vu_p, ju_p, vl_p, jl_p, flu_p = (
         Atot[sel_levels],
         lamlu[sel_levels],
@@ -104,7 +105,7 @@ def main():
     nvj_p = nvj[vl_p, jl_p]
 
     # HI calculations
-    NHI = basecalc.boltzmann(NHI_TOT, hi_ju, hi_jl, hi_lamlu, THI)
+    NHI = basecalc.boltzmann(constant.NHI_TOT, hi_ju, hi_jl, hi_lamlu, constant.THI)
     hih2_lamlu, hih2_flu, hih2_Atot, hih2_N = (
         np.append(hi_lamlu, lamlu_p),
         np.append(hi_flu, flu_p),
@@ -123,8 +124,8 @@ def main():
     tau_tot = basecalc.tau_tot
 
     # Incident UV background and attenuated source
-    if INC_SOURCE == "BLACKBODY":
-        uv_inc = basecalc.blackbody(lam, THI, unit=units)
+    if constant.INC_SOURCE == "BLACKBODY":
+        uv_inc = basecalc.blackbody(lam, constant.THI, unit=units)
     else:
         uv_inc = basecalc.uv_continuum(lam, unit=units)  # empirical cont.
     source = uv_inc * np.exp(-tau_tot)
@@ -135,10 +136,7 @@ def main():
     abs_rate_per_trans = np.sum(abs_rate, axis=1)
 
     # Plot source spectrum
-    plot_spectrum(lam, source,
-                  units = units,
-                  title=r"Source Spectrum",
-                  show=True)
+    plot_spectrum(lam, source, units=units, title=r"Source Spectrum", show=True)
 
     # ------------------------------------------------------ #
     # ----- EMERGENT SPECTRUM ------------------------------ #
@@ -153,7 +151,11 @@ def main():
     for ui in range(0, len(vu_p)):
         idx_u = np.where((vu == vu_p[ui]) & (ju == ju_p[ui]) & (band == band_p[ui]))[0]
         for idx in idx_u:
-            if np.any((Aul[idx] / Atot[idx] < LINE_STRENGTH_CUTOFF) | (lamlu[idx] < BP_MIN) | (lamlu[idx] > BP_MAX)):
+            if np.any(
+                (Aul[idx] / Atot[idx] < constant.LINE_STRENGTH_CUTOFF)
+                | (lamlu[idx] < constant.BP_MIN)
+                | (lamlu[idx] > constant.BP_MAX)
+            ):
                 continue
 
             vljl.append([vl[idx], jl[idx]])
@@ -166,36 +168,40 @@ def main():
     h2_Atot = np.array(h2_Atot) * u.s**-1
     flux_per_trans = np.array(flux_per_trans) * units
 
-    lam0, lamend, dlam = 912, 1800, DLAM.to(u.AA).value
+    lam0, lamend, dlam = 912, 1800, constant.DLAM.to(u.AA).value
     lam_highres = np.linspace(int(lam0), int(lamend), int((lamend - lam0) / dlam)) * u.AA
     source = np.interp(lam_highres, lam, source)
 
     ### Calculate emergent spectrum
     # SPEED TESTING: following line took ~5.3 seconds to run on 2023 Mac Pro M3 Pro chip
     lam_shifted, spec, spec_tot = basecalc.calc_spec(
-        lam_highres, h2_lamlu, h2_Atot, basecalc._dv_tot, flux_per_trans, source, units, DOPPLER_SHIFT
+        lam_highres, h2_lamlu, h2_Atot, basecalc._dv_tot, flux_per_trans, source, units, constant.DOPPLER_SHIFT
     )
 
     ### Save emergent spectrum
     np.savez_compressed(
-        f"h2-fluor-model_R={RESOLVING_POWER}_TH2={int(TH2.value)}_NH2={int(np.log10(NH2_TOT.value))}_THI={int(THI.value)}_NHI={int(np.log10(NHI_TOT.value))}",
+        f"h2-fluor-model_R={constant.RESOLVING_POWER}_TH2={int(constant.TH2.value)}_NH2={int(np.log10(constant.NH2_TOT.value))}_THI={int(constant.THI.value)}_NHI={int(np.log10(constant.NHI_TOT.value))}",
         lam_shifted=lam_shifted,
         spec=spec.to(units).value,
         spec_tot=spec_tot.to(units).value,
     )
 
     # Plot emission-only spectrum
-    plot_spectrum(lam_shifted, spec,
-                  xmin=BP_MIN.value, xmax=BP_MAX.value,
-                  ylabel=r"Intensity (arbitrary units)",
-                  title=r"Emergent Spectrum")
+    plot_spectrum(
+        lam_shifted,
+        spec,
+        xmin=constant.BP_MIN.value,
+        xmax=constant.BP_MAX.value,
+        ylabel=r"Intensity (arbitrary units)",
+        title=r"Emergent Spectrum",
+    )
     plt.axvline(1608, 0, 1, c="r", lw=0.5, dashes=(8, 4))
     plt.show()
 
     # Plot total (emission + continuum) spectrum
-    plot_spectrum(lam_shifted, spec_tot,
-                  ylabel=r"Intensity (arbitrary units)",
-                  title=r"Emergent Spectrum w/ Continuum")
+    plot_spectrum(
+        lam_shifted, spec_tot, ylabel=r"Intensity (arbitrary units)", title=r"Emergent Spectrum w/ Continuum"
+    )
     plt.axvline(1608, 0, 1, c="r", lw=0.5, dashes=(8, 4))
     plt.show()
 
