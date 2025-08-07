@@ -5,7 +5,6 @@ The code is based on  "EMPIRICALLY ESTIMATED FAR-UV EXTINCTION CURVES FOR CLASSI
 
 ![alt text](assets/img/SDG_logo.png "Title")
 
-
 ### Installation instructions
 Here are some installation instructions for the average Anaconda user. (Note: in the instructions below, we will assume that you are using a virtual environment named `myenv`.) We've tested this using Python 3.10.
 1. Activate your virtual environment:<br>
