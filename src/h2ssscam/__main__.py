@@ -8,11 +8,10 @@ To be incorporated:
 """
 import os
 import pathlib
-import matplotlib.pyplot as plt
 import astropy.units as u
-from h2ssscam.funcs import *
 from h2ssscam.constants import *
-from h2ssscam.helpers import BaseCalc
+from h2ssscam.BaseCalc import BaseCalc
+from h2ssscam.plotting_funcs import *
 import numpy as np
 from .data_loader import load_data
 
@@ -27,6 +26,7 @@ models_dir = base_dir / "models"
 def main():
 
     basecalc = BaseCalc()
+
 
     # ------------------------------------------------------ #
     # ----- LOAD H2 LINE DATA ------------------------------ #
@@ -135,15 +135,10 @@ def main():
     abs_rate_per_trans = np.sum(abs_rate, axis=1)
 
     # Plot source spectrum
-    plt.figure()
-    plt.plot(lam, source, lw=0.5)
-    plt.xlabel(r"Wavelength (\AA)")
-    if units == CU_UNIT:
-        plt.ylabel(r"Intensity (arbitrary units)")  # CU)')
-    else:
-        plt.ylabel(r"Intensity ($\mathrm{erg\;cm^{-2}\;s^{-1}\;arcsec^{-1}\;nm^{-1}}$)")
-    plt.title("Source Spectrum")
-    plt.show()
+    plot_spectrum(lam, source,
+                  units = units,
+                  title=r"Source Spectrum",
+                  show=True)
 
     # ------------------------------------------------------ #
     # ----- EMERGENT SPECTRUM ------------------------------ #
@@ -183,33 +178,25 @@ def main():
 
     ### Save emergent spectrum
     np.savez_compressed(
-        base_dir / "models" / f"h2-fluor-model_R={RESOLVING_POWER}_TH2={int(TH2.value)}_NH2={int(np.log10(NH2_TOT.value))}_THI={int(THI.value)}_NHI={int(np.log10(NHI_TOT.value))}",
+        f"h2-fluor-model_R={RESOLVING_POWER}_TH2={int(TH2.value)}_NH2={int(np.log10(NH2_TOT.value))}_THI={int(THI.value)}_NHI={int(np.log10(NHI_TOT.value))}",
         lam_shifted=lam_shifted,
         spec=spec.to(units).value,
         spec_tot=spec_tot.to(units).value,
     )
 
     # Plot emission-only spectrum
-    plt.plot(lam_shifted, spec, c="k", lw=0.5)
+    plot_spectrum(lam_shifted, spec,
+                  xmin=BP_MIN.value, xmax=BP_MAX.value,
+                  ylabel=r"Intensity (arbitrary units)",
+                  title=r"Emergent Spectrum")
     plt.axvline(1608, 0, 1, c="r", lw=0.5, dashes=(8, 4))
-    plt.xlabel(r"Wavelength (\AA)")
-    if units == CU_UNIT:
-        plt.ylabel(r"Intensity (arbitrary units)")  # CU)')
-    else:
-        plt.ylabel(r"Intensity ($\mathrm{erg\;cm^{-2}\;s^{-1}\;arcsec^{-1}\;nm^{-1}}$)")
-    plt.xlim([BP_MIN.value, BP_MAX.value])
-    plt.title("Emergent Spectrum")
     plt.show()
 
     # Plot total (emission + continuum) spectrum
-    plt.plot(lam_shifted, spec_tot, c="k", lw=0.5)
+    plot_spectrum(lam_shifted, spec_tot,
+                  ylabel=r"Intensity (arbitrary units)",
+                  title=r"Emergent Spectrum w/ Continuum")
     plt.axvline(1608, 0, 1, c="r", lw=0.5, dashes=(8, 4))
-    plt.xlabel(r"Wavelength (\AA)")
-    if units == CU_UNIT:
-        plt.ylabel(r"Intensity (arbitrary units)")  # CU)')
-    else:
-        plt.ylabel(r"Intensity ($\mathrm{erg\;cm^{-2}\;s^{-1}\;arcsec^{-1}\;nm^{-1}}$)")
-    plt.title("Emergent Spectrum w/ Continuum")
     plt.show()
 
 
