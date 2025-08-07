@@ -10,10 +10,14 @@ The code is based on  "EMPIRICALLY ESTIMATED FAR-UV EXTINCTION CURVES FOR CLASSI
 1. Install `uv` via `pip` (`pip install uv`).
 2. Clone the repository.
 3. Navigate using the terminal to the repository directory.
-4. install the package (`uv pip install .`). If you want to edit the code after install and test it without reinstalling it, swap `.` for `-e .`.
+4. Install the package (`uv pip install .`). If you want to edit the code after install and test it without reinstalling it, swap `.` for `-e .`. Run `pip install -e ".[test]"` to install test dependencies (currently just `pytest`).
 
 ### Running the Code
 1. Run `h2ssscam` on the command line.
 2. Run `uv run h2ssscam` on the command line.
 
 Both options can be run from anywhere on your system.
+
+### How to Run Tests
+1. After installing this, `cd [repo directory]` on your computer.
+2. Run `python -m pytest .`.
