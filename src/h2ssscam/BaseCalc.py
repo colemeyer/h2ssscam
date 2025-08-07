@@ -4,7 +4,7 @@ from scipy.special import wofz
 import astropy.constants as c
 import astropy.units as u
 import numpy as np
-from .Constants import Constants
+from h2ssscam.Constants import Constants
 
 
 @dataclass
