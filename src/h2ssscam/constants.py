@@ -1,6 +1,7 @@
 import astropy.units as u
 import os
 from .data_loader import load_config_files
+from datetime import datetime
 
 
 class Constants:
@@ -130,8 +131,10 @@ class Constants:
         """
         for key in self.config["PARAMETERS"]:
             self.set_value(key, getattr(self, key.upper()))
+        timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
+        output_file = os.path.join(output_path, f"config_{timestamp}.ini")
 
-        with open(output_path, "w") as configfile:
+        with open(output_file, "w") as configfile:
             self.config.write(configfile)
 
 
