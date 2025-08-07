@@ -1,12 +1,38 @@
-# ========== FILE: h2_model_constants.py ==========
-"""
-Defines physical constants and cutoff parameters for the H₂ fluorescence model.
-Values chosen per McJunkin et al. (2016), Section 4.
-"""
 import astropy.units as u
+import configparser
+class Constants:
+    """
+    Defines physical constants and cutoff parameters for the H₂ fluorescence model.
+    Values chosen per McJunkin et al. (2016), Section 4.
+    """
+    def __init__(self,config_file : str | None= None):
+        self.config = self.read_config_files(config_file)
+        self.CU_UNIT = u.ph * u.cm**-2 * u.s**-1 * u.sr**-1 * u.AA**-1
+        self.ERG_UNIT = u.erg * u.cm**-2 * u.s**-1 * u.arcsec**-2 * u.nm**-1
+        # max vibrational (v) and rotational (J) levels for Lyman–Werner bands
+        self.VMAX  = float(self.value('VMAX'))
+        self.JMAX = float(self.value('JMAX'))
+        # model bandpass lambda in [1380,1620] angstroms
+        self.BP_MIN = float(self.value('BP_MIN'))* u.AA
+        self.BP_MAX = float(self.value('BP_MAX'))* u.AA
 
-CU_UNIT = u.ph * u.cm**-2 * u.s**-1 * u.sr**-1 * u.AA**-1
-ERG_UNIT = u.erg * u.cm**-2 * u.s**-1 * u.arcsec**-2 * u.nm**-1
+        self.LINE_STRENGTH_CUTOFF = float(self.value('LINE_STRENGTH_CUTOFF'))
+        self.UNIT = self.value('UNIT')
+        self.DLAM = float(self.value('DLAM'))* u.AA
+        self.TH2 = float(self.value('TH2'))* u.K 
+        self.NH2_TOT = float(self.value('NH2_TOT'))* u.cm**-2 
+        self.NH2_CUTOFF = float(self.value('NH2_CUTOFF'))* u.cm**-2 
+        self.VELOCITY_DISPERSION = float(self.value('VELOCITY_DISPERSION'))*u.km / u.s 
+        self.DOPPLER_SHIFT = float(self.value('DOPPLER_SHIFT'))* u.km / u.s
+        self.THI = float(self.value('THI'))* u.K
+        self.NHI_TOT = float(self.value('NHI_TOT'))* u.cm**-2
+        self.INC_SOURCE = self.value('INC_SOURCE')
+    def read_config_files(self,user_config_file):
+        pass
+    def value(self,parameter_name)
+        return self.config['USER'].get(parameter_name, self.config['DEFAULT'][parameter_name])
+# ========== FILE: h2_model_constants.py ==========
+
 
 # ------------------------------------------------------ #
 # ----- LINE PARAMETERS -------------------------------- #
