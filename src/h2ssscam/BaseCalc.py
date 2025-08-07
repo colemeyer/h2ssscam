@@ -50,6 +50,14 @@ class BaseCalc:
                 raise ValueError("Calculate tau_tot before...")
             self._tau_tot = self._calc_tau_tot()
         return self._tau_tot
+    def reset_parameters(self):
+        """Clean calculated and stored values
+        """        
+        self._dv_phys = None
+        self._dv_tot = None
+        self._tau = None
+        self._tau_tot = None
+        self._siglu = None
 
     def calc_flu(self, ju, jl, lamlu, Aul):
         """Calculate oscillator strength f_lu from Einstein A coefficient.
