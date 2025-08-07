@@ -10,6 +10,9 @@ packaging==25.0
 pillow==11.3.0
 pyerfa==2.0.1.5
 pyparsing==3.2.3
+pyqt6==6.9.1
+pyqt6-qt6==6.9.1
+pyqt6-sip==13.10.2
 python-dateutil==2.9.0.post0
 pyyaml==6.0.2
 scipy==1.15.3
