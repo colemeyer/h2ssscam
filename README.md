@@ -18,14 +18,10 @@ Here are some installation instructions for the average Anaconda user. (Note: in
 You're now ready to use the `h2ssscam` package! To run the code, execute the following in the terminal:<br>
     `% python -m h2ssscam`
 
-The user may also modify the input parameters for the model. To do so,
-1. Open a Jupyter Notebook, Python script, or iPython and load the create_config_file function using<br>
-    `from h2ssscam import create_config_file`
-2. Create a configuration file by running<br>
-    `create_config_file(directory)`,<br>
-    where `directory` is the directory in which you would like to create the configuration file.
-3. Modify variables in the generated file and save. Run `h2ssscam` as usual using<br>
-    `python -m h2ssscam [config_file_path]`.
+The user may also modify the input parameters for the model. To do so, navigate into the desired directory and run in the terminal<br>
+    `% python -m h2ssscam.create_config_file`<br>
+Modify the desired parameters and run the model as usual by executing the following in the terminal:<br>
+    `% python -m h2ssscam`
 
 **Note that package dependencies for `h2ssscam` are managed using the `uv` package manager. Advanced users are encouraged to run `h2ssscam` using `uv` functionalities (e.g., `uv run h2ssscam`).**
 
