@@ -65,7 +65,7 @@ def main():
     # ------------------------------------------------------ #
 
     # NIST Atomic Spectral Database for HI
-    s = load_data(base_dir / "data" / "hi_data_NIST")
+    s = load_data("hi_data_NIST")
     hi_lamlu, hi_jl, hi_ju, hi_Aul, hi_flu = s["lamlu"] * u.AA, s["jl"], s["ju"], s["Aul"] * u.s**-1, s["flu"]
 
     # ------------------------------------------------------ #
