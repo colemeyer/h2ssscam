@@ -14,5 +14,10 @@ Functions to perform basic calculations required to create spectograms.
     :undoc-members:
     :show-inheritance:
 
+.. automodule:: h2ssscam.Constants
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 
