@@ -1,11 +1,10 @@
 """
 Contains the tests for the data_loader module.
 """
-import json
 import os
 import pickle
-import numpy.testing as npt
 from pathlib import Path
+import numpy.testing as npt
 import pytest
 from h2ssscam.data_loader import load_data
 
