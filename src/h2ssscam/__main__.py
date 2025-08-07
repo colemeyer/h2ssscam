@@ -12,8 +12,8 @@ import astropy.units as u
 from h2ssscam.BaseCalc import BaseCalc
 from h2ssscam.plotting_funcs import *
 import numpy as np
-from .data_loader import load_data
-from .Constants import Constants
+from h2ssscam.data_loader import load_data
+from h2ssscam.Constants import Constants
 
 # from funkyfresh import set_style
 # set_style('AAS', silent=True)
@@ -66,7 +66,7 @@ def main():
     # ------------------------------------------------------ #
 
     # NIST Atomic Spectral Database for HI
-    s = load_data(base_dir / "data" / "hi_data_NIST")
+    s = load_data("hi_data_NIST")
     hi_lamlu, hi_jl, hi_ju, hi_Aul, hi_flu = s["lamlu"] * u.AA, s["jl"], s["ju"], s["Aul"] * u.s**-1, s["flu"]
 
     # ------------------------------------------------------ #

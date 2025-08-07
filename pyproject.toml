@@ -8,7 +8,13 @@ dependencies = [
     "astropy==6.1.7",
     "matplotlib==3.10.5",
     "numpy==2.2.6",
+    "pyqt6>=6.9.1",
     "scipy==1.15.3",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest==8.4.1",
 ]
 
 [build-system]
@@ -22,7 +28,12 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.setuptools.package-data]
-mypackage = ["data/*"]
+h2ssscam  = ["data/*"]
+
+[dependency-groups]
+dev = [
+    "pytest==8.4.1",
+]
 
 [project.scripts]
 h2ssscam = "h2ssscam.__main__:main"
