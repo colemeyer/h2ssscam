@@ -102,7 +102,16 @@ class Constants:
             return float(parameter)
         return parameter
 
-    def set_value(self, parameter_name, value):
+    def _set_value(self, parameter_name, value):
+        """Updates value in configparser
+
+        Parameters
+        ----------
+        parameter_name : str
+            Parameter name to be updated
+        value : float | Quantity | str
+            Value of the parameter to be updated
+        """        
         if type(value) == u.Quantity:
             value = value.value
         if type(value) != str:
@@ -110,6 +119,17 @@ class Constants:
         self.config["PARAMETERS"][parameter_name] = value
 
     def read_config_files(self, user_config_path):
+        """Loads default config file from the package and user's config file if specified
+
+        Parameters
+        ----------
+        user_config_path : str
+            Path to the config file
+
+        Returns
+        -------
+        configparser
+        """        
         config = load_config_files()
         if user_config_path is None:
             return config
@@ -130,7 +150,7 @@ class Constants:
             Output file path
         """
         for key in self.config["PARAMETERS"]:
-            self.set_value(key, getattr(self, key.upper()))
+            self._set_value(key, getattr(self, key.upper()))
         timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
         output_file = os.path.join(output_path, f"config_{timestamp}.ini")
 
