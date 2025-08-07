@@ -30,5 +30,10 @@ where = ["src"]
 [tool.setuptools.package-data]
 h2ssscam  = ["data/*"]
 
+[dependency-groups]
+dev = [
+    "pytest==8.4.1",
+]
+
 [project.scripts]
 h2ssscam = "h2ssscam.__main__:main"
