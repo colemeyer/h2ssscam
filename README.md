@@ -3,7 +3,7 @@ Synthetic H2 fluorescence code refactored by Cole Meyer, Daniel Lopez-Sanders, C
 
 The code is based on  "EMPIRICALLY ESTIMATED FAR-UV EXTINCTION CURVES FOR CLASSICAL T TAURI STARS", McJunkin, M., France, K., Schindhelm, R., Herczeg, G., Schneider, P. C., & Brown, A. (2016), ApJ, 828, 69. 
 
-![alt text](assets/img/SDG_logo.png "Title")
+<img src="assets/img/SDG_logo.png" alt="alt text" title="Title" width="400">
 
 ### Installation instructions
 Here are some installation instructions for the average Anaconda user. (Note: in the instructions below, we will assume that you are using a virtual environment named `myenv`.) We've tested this using Python 3.10.
