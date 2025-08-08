@@ -1,7 +1,7 @@
 # h2ssscam
 Synthetic H2 fluorescence code refactored by Cole Meyer, Daniel Lopez-Sanders, Cassandra S. Cruz, Dominik P. Pacholski during Code/Astro 2025.
 
-The code is based on  ''Empirically estimated far-UV extinction curves for classical T Tauri stars'', McJunkin, M., France, K., Schindhelm, R., Herczeg, G., Schneider, P. C., & Brown, A. (2016), ApJ, 828, 69.
+The code is based on  ''Empirically estimated far-UV extinction curves for classical T Tauri stars'', McJunkin, M., France, K., Schindhelm, R., Herczeg, G., Schneider, P. C., & Brown, A. (2016), ApJ, 828, 69.<br>
 
 <img src="https://raw.githubusercontent.com/colemeyer/h2ssscam/main/assets/img/SDG_logo.png" alt="Purple square logo with white border, showing a snake silhouette made of binary code and surrounded by asterisks, with the text H2SSSSCAM in stylized font at the bottom." title="h2ssscam logo" width="400">
 
@@ -23,6 +23,8 @@ If the user would like to save the config file in the current directory, they sh
     `% python -m h2ssscam [directory]/[config file name]`
 
 Complete documentation can be found on Read the Docs: [https://h2ssscam.readthedocs.io/en/latest/index.html](https://h2ssscam.readthedocs.io/en/latest/index.html)<br>
+The GitHub repository for `h2ssscam` can be found at [https://github.com/colemeyer/h2ssscam](https://github.com/colemeyer/h2ssscam)<br>
+The PyPI project for `h2ssscam` can be found at [https://pypi.org/project/h2ssscam/](https://pypi.org/project/h2ssscam/)<br>
 The paper on which this code is based, McJunkin et al. 2016, can be found at [https://iopscience.iop.org/article/10.3847/0004-637X/828/2/69/meta](https://iopscience.iop.org/article/10.3847/0004-637X/828/2/69/meta)<br>
 More information about the Code/Astro workshop during which this package was developed can be found at [https://semaphorep.github.io/codeastro/](https://semaphorep.github.io/codeastro/)
 
